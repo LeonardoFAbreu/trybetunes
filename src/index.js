@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 
+// Commit inicial
+
 ReactDOM.render(
   <React.StrictMode>
     <App />
