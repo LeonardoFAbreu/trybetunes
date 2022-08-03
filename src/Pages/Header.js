@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { getUser } from '../services/userAPI';
 
 class Header extends Component {
@@ -27,6 +28,11 @@ class Header extends Component {
           {/* { login } */}
           { load ? <p>Carregando...</p>
             : <span data-testid="header-user-name">{`Olá, ${login}`}</span> }
+          <nav>
+            <Link to="/search" data-testid="link-to-search">Buscar</Link>
+            <Link to="/favorites" data-testid="link-to-favorites">Músicas curtidas</Link>
+            <Link to="/profile" data-testid="link-to-profile">Meu perfil</Link>
+          </nav>
         </header>
       </div>
     );
