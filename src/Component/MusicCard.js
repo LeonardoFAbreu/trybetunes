@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { addSong } from '../services/favoriteSongsAPI';
+// import { addSong } from '../services/favoriteSongsAPI';
 
 class MusicCard extends React.Component {
   constructor() {
@@ -10,36 +10,46 @@ class MusicCard extends React.Component {
     };
   }
 
-  handleChange = async () => {
-    const { trackId, trackName, previewUrl } = this.props;
+  // handleChange = async () => {
+  //   const { trackId, trackName, previewUrl } = this.props;
 
-    this.setState({
-      isLoading: true,
-    });
+  //   this.setState({
+  //     isLoading: true,
+  //   });
 
-    await addSong({ trackId, trackName, previewUrl });
+  //   await addSong({ trackId, trackName, previewUrl });
 
-    this.setState({
-      isLoading: false,
-    });
-  };
+  //   this.setState({
+  //     isLoading: false,
+  //   });
+  // };
 
   render() {
     const { isLoading } = this.state;
-    const { trackName, previewUrl, trackId } = this.props;
+    const {
+      trackName,
+      previewUrl,
+      trackId,
+      onToggle,
+      isFavorite,
+    } = this.props;
+
+    if (isLoading) return <p>Carregando...</p>;
 
     return (
       <section>
         <div>
           <h3>{trackName}</h3>
-          <audio data-testid="audio-component" src={ previewUrl } controls>
+          <audio
+            data-testid="audio-component"
+            src={ previewUrl }
+            controls
+          >
             <track kind="captions" />
             O seu navegador não suporta o elemento
             {' '}
             <code>audio</code>
           </audio>
-
-          {isLoading && <p>Carregando...</p>}
 
         </div>
         <div>
@@ -47,8 +57,9 @@ class MusicCard extends React.Component {
             Favorita
             <input
               type="checkbox"
-              onChange={ this.handleChange }
+              onChange={ onToggle }
               data-testid={ `checkbox-music-${trackId}` }
+              checked={ isFavorite }
             />
           </label>
         </div>
@@ -61,6 +72,8 @@ MusicCard.propTypes = {
   trackName: PropTypes.string.isRequired,
   previewUrl: PropTypes.string.isRequired,
   trackId: PropTypes.number.isRequired,
+  isFavorite: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired,
 };
 
 export default MusicCard;

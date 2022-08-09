@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import Header from './Header';
 import MusicCard from '../Component/MusicCard';
 import getMusics from '../services/musicsAPI';
+import { addSong, getFavoriteSongs } from '../services/favoriteSongsAPI';
 
 class Album extends React.Component {
   constructor() {
@@ -12,6 +13,7 @@ class Album extends React.Component {
     this.state = {
       tracks: [],
       isLoading: true,
+      favorites: [],
     };
   }
 
@@ -19,16 +21,33 @@ class Album extends React.Component {
     const { match } = this.props;
     const { id } = match.params;
 
-    const tracks = await getMusics(id);
+    const [tracks, favorites] = await Promise.all([
+      getMusics(id),
+      getFavoriteSongs(),
+    ]);
 
     this.setState({
       isLoading: false,
       tracks,
+      favorites: favorites.map(({ trackId }) => trackId),
     });
   }
 
+  handleChange = async ({ trackId, trackName, previewUrl }) => {
+    this.setState((currentState) => ({
+      isLoading: true,
+      favorites: [...currentState.favorites, trackId],
+    }));
+
+    await addSong({ trackId, trackName, previewUrl });
+
+    this.setState({
+      isLoading: false,
+    });
+  };
+
   render() {
-    const { isLoading, tracks } = this.state;
+    const { isLoading, tracks, favorites } = this.state;
     const { artistName, collectionName } = tracks[0] || {};
 
     if (isLoading) return <p>Carregando...</p>;
@@ -46,7 +65,12 @@ class Album extends React.Component {
           {tracks
             .filter(({ kind }) => kind === 'song')
             .map((track) => (
-              <MusicCard key={ track.trackId } { ...track } />
+              <MusicCard
+                key={ track.trackId }
+                { ...track }
+                isFavorite={ favorites.includes(track.trackId) }
+                onChange={ this.handleChange }
+              />
             ))}
         </ul>
       </section>
