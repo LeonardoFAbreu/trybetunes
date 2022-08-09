@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createUser } from '../services/userAPI';
 
-class LoginForm extends Component {
+class Login extends Component {
   constructor() {
     super();
 
@@ -73,10 +73,10 @@ class LoginForm extends Component {
   }
 }
 
-LoginForm.propTypes = {
+Login.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func,
   }).isRequired,
 };
 
-export default LoginForm;
+export default Login;

@@ -47,7 +47,7 @@ class Search extends Component {
     if (loading) return <p> Carregando...</p>;
 
     return (
-      <section>
+      <div data-testid="page-search">
         {/* <form> */}
         <form onSubmit={ this.handleSearch }>
           <Header />
@@ -92,7 +92,7 @@ class Search extends Component {
             </ul>
           </section>
         </form>
-      </section>
+      </div>
     );
   }
 }
