@@ -1,89 +1,69 @@
 import React from 'react';
-// import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Header from './Header';
-import MusicCard from '../Component/MusicCard';
 import getMusics from '../services/musicsAPI';
-import { addSong, getFavoriteSongs } from '../services/favoriteSongsAPI';
+import MusicCard from '../Component/MusicCard';
+import Loading from '../Component/Loading';
+import { addSong } from '../services/favoriteSongsAPI';
 
 class Album extends React.Component {
   constructor() {
     super();
-
     this.state = {
+      favorite: [],
       tracks: [],
-      isLoading: true,
-      favorites: [],
+      isLoading: false,
     };
   }
 
-  async componentDidMount() {
-    const { match } = this.props;
-    const { id } = match.params;
-
-    const [tracks, favorites] = await Promise.all([
-      getMusics(id),
-      getFavoriteSongs(),
-    ]);
-
-    this.setState({
-      isLoading: false,
-      tracks,
-      favorites: favorites.map(({ trackId }) => trackId),
-    });
+  componentDidMount() {
+    this.playMusic();
   }
 
-  handleChange = async ({ trackId, trackName, previewUrl }) => {
-    this.setState((currentState) => ({
-      isLoading: true,
-      favorites: [...currentState.favorites, trackId],
-    }));
+  addToFavorite = async () => {
+    const { tracks } = this.props;
+    this.setState({ isLoading: true });
+    await addSong(tracks);
+    this.setState({ isLoading: false });
+  };
 
-    await addSong({ trackId, trackName, previewUrl });
-
+  playMusic = async () => {
+    const { match: { params: { id } } } = this.props;
+    const callApi = await getMusics(id);
+    const newPosition = callApi[0];
     this.setState({
-      isLoading: false,
+      favorite: newPosition,
+      tracks: callApi,
     });
   };
 
   render() {
-    const { isLoading, tracks, favorites } = this.state;
-    const { artistName, collectionName } = tracks[0] || {};
-
-    if (isLoading) return <p>Carregando...</p>;
+    const { tracks, favorite, isLoading } = this.state;
 
     return (
-      <section>
-        <div data-testid="page-album">
-          Album
-        </div>
+      <div data-testid="page-album">
         <Header />
-        <h2 data-testid="album-name">{collectionName}</h2>
-        <p data-testid="artist-name">{artistName}</p>
-
+        <p data-testid="album-name">{ favorite.collectionName }</p>
+        <p data-testid="artist-name">{ favorite.artistName }</p>
+        { isLoading ? <Loading /> : null }
         <ul>
-          {tracks
-            .filter(({ kind }) => kind === 'song')
-            .map((track) => (
-              <MusicCard
-                key={ track.trackId }
-                { ...track }
-                isFavorite={ favorites.includes(track.trackId) }
-                onChange={ this.handleChange }
-              />
-            ))}
+          {
+            tracks.filter((music) => music !== favorite)
+              .map((disco, id) => (
+                <MusicCard
+                  addToFavorite={ this.addToFavorite }
+                  disco={ disco }
+                  key={ id }
+                />))
+          }
         </ul>
-      </section>
+      </div>
     );
   }
 }
 
 Album.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-    }).isRequired,
-  }).isRequired,
-};
+  match: PropTypes.object,
+}.isRequired;
 
 export default Album;
